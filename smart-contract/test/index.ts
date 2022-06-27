@@ -1,19 +1,55 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+import { Medium, Medium__factory } from "../typechain";
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+describe("Testing Medium.sol", () => {
+  let Medium: Medium__factory;
+  let medium: Medium;
+  let owner: SignerWithAddress;
+  let blogger1: SignerWithAddress;
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+  const feesInEther = 5;
+  beforeEach(async () => {
+    const fees = ethers.utils.parseEther(feesInEther.toString());
+    [owner, blogger1] = await ethers.getSigners();
+    Medium = await ethers.getContractFactory("Medium");
+    medium = await Medium.connect(owner).deploy("TestToken", "TT", fees);
+    await medium.deployed();
+  });
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+  describe("Constructor", () => {
+    it("Should set the state variable", async () => {
+      const fees = ethers.utils.parseEther(feesInEther.toString());
+      expect(await medium.getFees()).to.be.equal(fees);
+    });
+  });
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+  describe("SafeMint", () => {
+    it("Should revert if not enough ether sent", async () => {
+      const feesSent = ethers.utils.parseEther((feesInEther / 2).toString());
+      const tx = medium.safeMint(blogger1.address, "something", {
+        value: feesSent,
+      });
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+      await expect(tx).to.be.reverted;
+    });
+    it("Should transfer fund to owner", async () => {
+      const feesSent = ethers.utils.parseEther(feesInEther.toString());
+      console.log("fee sent", ethers.utils.formatEther(feesSent));
+      const ownerBalanceBefore = await owner.getBalance();
+      console.log("before", ownerBalanceBefore);
+      const tx = await medium.safeMint(blogger1.address, "something", {
+        value: feesSent,
+      });
+      await tx.wait(1);
+      const ownerBalanceAfter = await owner.getBalance();
+      console.log(ownerBalanceAfter);
+      const ownerGain = Number(ownerBalanceAfter) - Number(ownerBalanceBefore);
+      console.log(ownerGain);
+      const feesReceive = ethers.utils.parseEther(feesInEther.toString());
+      //expect(ownerGain.toString()).to.be.equal(feesReceive);
+    });
   });
 });
