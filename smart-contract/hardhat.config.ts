@@ -26,8 +26,9 @@ const config: HardhatUserConfig = {
   solidity: "0.8.7",
   networks: {
     mumbai: {
-      url: process.env.POLYGON_MUMBAI_JSON_RPC_NODE,
-      accounts: [process.env.PRIVATE_KEY!],
+      url: process.env.POLYGON_MUMBAI_JSON_RPC_NODE || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
