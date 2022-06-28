@@ -25,6 +25,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 const config: HardhatUserConfig = {
   solidity: "0.8.7",
   networks: {
+    mumbai: {
+      url: process.env.POLYGON_MUMBAI_JSON_RPC_NODE,
+      accounts: [process.env.PRIVATE_KEY!],
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
@@ -36,7 +40,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.POLYGONSCAN_API_KEY,
   },
 };
 
