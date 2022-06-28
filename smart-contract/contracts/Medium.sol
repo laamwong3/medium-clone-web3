@@ -34,10 +34,10 @@ contract Medium is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(currentTokenID, _uri);
         tokenIdCounter.increment();
 
-        // (bool success, ) = payable(owner()).call{value: fees}("");
-        // if (!success) revert Medium__Transfer_Fail();
+        (bool success, ) = payable(owner()).call{value: fees}("");
+        if (!success) revert Medium__Transfer_Fail();
 
-        payable(owner()).transfer(fees);
+        // payable(owner()).transfer(fees);
 
         uint256 currentContractBalance = address(this).balance;
         if (currentContractBalance > 0) {
