@@ -108,7 +108,9 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
     }
   };
 
-  const mint = async (mintTo, tokenUri) => {};
+  const mint = async (mintTo, tokenUri) => {
+    await executeContractFunction({});
+  };
 
   //   console.log(input);
   const handleChange = (
