@@ -25,6 +25,7 @@ import { ConnectButton } from "web3uikit";
 import { useMoralis } from "react-moralis";
 import PublishForm from "./PublishForm";
 import { useState } from "react";
+import { useStateAPI } from "../context/StateManager";
 
 const drawerWidth = 90;
 
@@ -34,12 +35,14 @@ interface Props {
    * You won't need it on your project.
    */
   window?: () => Window;
+  children: React.ReactNode;
 }
 
 export default function Layout(props: Props) {
-  const { window } = props;
+  const { window, children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  // const [isUploading, setIsUploading] = useState(false);
+  const { isUploadingToIpfs, setIsUploadingToIpfs } = useStateAPI();
 
   const {
     logout,
@@ -115,7 +118,7 @@ export default function Layout(props: Props) {
         <ListItem>
           <Tooltip title="Logout">
             <ListItemButton
-              disabled={isUploading}
+              disabled={isUploadingToIpfs || !isAuthenticated}
               onClick={async () => {
                 if (isAuthenticated) await logout();
               }}
@@ -177,7 +180,7 @@ export default function Layout(props: Props) {
             <Button
               variant="contained"
               color="primary"
-              disabled={isLoggingOut || isUploading}
+              disabled={isLoggingOut || isUploadingToIpfs}
               onClick={async () => await logout()}
             >
               Logout
@@ -232,8 +235,8 @@ export default function Layout(props: Props) {
         }}
       >
         <Toolbar />
-
-        {router.pathname === "/" && <Typography paragraph>Home</Typography>}
+        {children}
+        {/* {router.pathname === "/" && <Typography paragraph>Home</Typography>}
         {router.pathname === "/myblog" && (
           <Typography paragraph> my blog</Typography>
         )}
@@ -242,7 +245,7 @@ export default function Layout(props: Props) {
             isUploading={isUploading}
             setIsUploading={setIsUploading}
           />
-        )}
+        )} */}
       </Box>
     </Box>
   );

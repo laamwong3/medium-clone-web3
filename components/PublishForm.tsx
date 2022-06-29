@@ -6,32 +6,28 @@ import {
   useWeb3ExecuteFunction,
 } from "react-moralis";
 import { useNotification } from "web3uikit";
+import mediumContract from "../constants/contractABI/Medium.json";
+import { useStateAPI } from "../context/StateManager";
 
-interface IPFSDataType {
-  __type: string;
-  name: string;
-  url: string;
-  ipfs: string;
-  hash: string;
-}
-interface PublishFormPropsType {
-  isUploading: boolean;
-  setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
-}
+// interface PublishFormPropsType {
+//   isUploading: boolean;
+//   setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
+// }
 
-const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
+const PublishForm = () => {
+  // console.log(MediumContract);
   const [input, setInput] = useState({
     title: "",
     content: "",
   });
-
+  const { isUploadingToIpfs, setIsUploadingToIpfs } = useStateAPI();
   const { Moralis, account, isAuthenticated } = useMoralis();
   const { saveFile } = useMoralisFile();
   const { fetch: executeContractFunction } = useWeb3ExecuteFunction();
   const dispatch = useNotification();
 
   const uploadToIPFS = async () => {
-    setIsUploading(true);
+    setIsUploadingToIpfs(true);
     if (input.title.trim() !== "" && input.content.trim() !== "") {
       const metadata = {
         title: input.title,
@@ -45,14 +41,6 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
           type: "base64",
           saveIPFS: true,
           onSuccess: async (result) => {
-            // const data = JSON.stringify(result, null, 2);
-            // const final = JSON.parse(data);
-            // console.log(final);
-            // console.log(result);
-            // console.log(result._url.split("/")[6]);
-            //const hash = result._url.split("/")[6];
-            // console.log(result._ipfs);
-            // console.log(result);
             const metadataNFT = {
               description: input.title,
               //@ts-ignore
@@ -68,31 +56,21 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
                 type: "base64",
                 saveIPFS: true,
                 onSuccess: async (finalResult) => {
-                  //   console.log(finalResult);
-                  //   setIsUploading(false);
                   //@ts-ignore
-                  console.log(finalResult._ipfs);
-                  await mint(account, finalResult._ipfs);
-
-                  dispatch({
-                    type: "info",
-                    title: "Upload and mint NFT successfully",
-                    //@ts-ignore
-                    message: finalResult._ipfs,
-                    position: "topR",
-                    icon: "bell",
-                  });
+                  // console.log(finalResult._ipfs);
+                  //@ts-ignore
+                  await mint(account!, finalResult._ipfs);
                 },
                 onError: (error) => {
                   console.log(error);
-                  setIsUploading(false);
+                  setIsUploadingToIpfs(false);
                 },
               }
             );
           },
           onError: (error) => {
             console.log(error);
-            setIsUploading(false);
+            setIsUploadingToIpfs(false);
           },
         }
       );
@@ -100,19 +78,47 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
       dispatch({
         type: "error",
         position: "topR",
-        message: "Input cant be empty",
+        message: "Input can't be empty",
         icon: "exclamation",
         title: "Error",
       });
-      setIsUploading(false);
+      setIsUploadingToIpfs(false);
     }
   };
 
-  const mint = async (mintTo, tokenUri) => {
-    await executeContractFunction({});
+  const mint = async (mintTo: string, tokenUri: string) => {
+    await executeContractFunction({
+      params: {
+        contractAddress: mediumContract.address,
+        functionName: "safeMint",
+        abi: mediumContract.abi,
+        params: {
+          _to: mintTo,
+          _uri: tokenUri,
+        },
+        msgValue: Moralis.Units.ETH("0.01"),
+      },
+      onSuccess: async (result) => {
+        console.log(result);
+
+        //@ts-ignore
+        // await result.wait(1);
+        dispatch({
+          type: "info",
+          title: "Upload and mint NFT successfully",
+          message: "Please verify on polygon scan",
+          position: "topR",
+          icon: "bell",
+        });
+        setIsUploadingToIpfs(false);
+      },
+      onError: (error) => {
+        console.log(error);
+        setIsUploadingToIpfs(false);
+      },
+    });
   };
 
-  //   console.log(input);
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -137,6 +143,7 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
           fullWidth
           multiline
           minRows={20}
+          maxRows={20}
           id="outlined-basic"
           label="Content"
           variant="outlined"
@@ -145,7 +152,7 @@ const PublishForm = ({ isUploading, setIsUploading }: PublishFormPropsType) => {
         />
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Button
-            disabled={!isAuthenticated || isUploading}
+            disabled={!isAuthenticated || isUploadingToIpfs}
             variant="contained"
             onClick={uploadToIPFS}
           >

@@ -1,10 +1,12 @@
+import { NextPage } from "next";
 import React from "react";
 import Layout from "../components/Layout";
+import PublishForm from "../components/PublishForm";
 
-const Publish = () => {
+const Publish: NextPage = () => {
   return (
     <>
-      <Layout />
+      <PublishForm />
     </>
   );
 };
