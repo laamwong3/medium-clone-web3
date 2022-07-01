@@ -27,6 +27,8 @@ interface BlogsTypes extends BlogsMetadataTypes {
 const DisplayBlog = () => {
   const [blogs, setBlogs] = useState<BlogsTypes[]>([]);
   const [blogsContent, setBlogsContent] = useState<BlogsContentTypes[]>([]);
+  const [test, setTest] = useState([]);
+
   // const [isFetchingIpfs, setIsFetchingIpfs] = useState(false);
   const { token } = useMoralisWeb3Api();
   const { data: allNfts, fetch: getNfts } = useMoralisWeb3ApiCall(
@@ -37,8 +39,9 @@ const DisplayBlog = () => {
     },
     { autoFetch: true }
   );
+  console.log(test);
   console.log(blogs);
-  console.log(blogsContent);
+  // console.log(blogsContent);
   //console.log(allNfts);
 
   // useEffect(() => {
@@ -69,44 +72,95 @@ const DisplayBlog = () => {
   //   })();
   // }, [blogs]);
 
-  useEffect(() => {}, [blogs]);
+  // useEffect(() => {
+  //   //setBlogsContent([]);
+  //   if (blogs.length !== 0) {
+  //     let content: BlogsContentTypes[] = [];
+
+  //     blogs.map(async (blog) => {
+  //       let { data } = await axios.get<BlogsContentMetadataTypes>(
+  //         blog.externalUrl.replace(
+  //           "https://ipfs.moralis.io:2053/ipfs/",
+  //           "https://ipfs.io/ipfs/"
+  //           // "https://gateway.moralisipfs.com/ipfs/"
+  //         )
+  //       );
+
+  //       let item: BlogsContentTypes = {
+  //         content: data.content,
+  //         title: data.title,
+  //         owner: blog.owner,
+  //       };
+
+  //       if (!blogsContent.includes(item)) {
+  //         content.push(item);
+  //       }
+  //       setBlogsContent(content);
+  //     });
+  //   }
+  // }, [blogs]);
   //console.log(!blogs);
+
+  useEffect(() => {
+    //test if it will rerender again
+
+    let sample = [
+      { url: "https://jsonplaceholder.typicode.com/users" },
+      { url: "https://jsonplaceholder.typicode.com/posts" },
+      { url: "https://jsonplaceholder.typicode.com/comments" },
+      { url: "https://jsonplaceholder.typicode.com/todos" },
+      { url: "https://jsonplaceholder.typicode.com/albums" },
+    ];
+
+    if (sample) {
+      let content = [];
+      sample.map(async (each) => {
+        let { data } = await axios.get<string>(each.url);
+
+        // if(!test.includes(data))
+      });
+    }
+  }, []);
+
   useEffect(() => {
     (() => {
-      setBlogs([]);
       //setBlogsContent([]);
       if (allNfts?.result) {
+        // setBlogs([]);
+        let content: BlogsTypes[] = [];
         allNfts.result.map(async (nft) => {
           if (nft.metadata) {
             let { description, externalUrl }: BlogsMetadataTypes = JSON.parse(
               nft.metadata
             );
-            setBlogs((prevState) => [
-              ...prevState,
-              {
-                description: description,
-                externalUrl: externalUrl,
-                owner: nft.owner_of,
-              },
-            ]);
-            // let { data } = await axios.get<MetadataTypes>(nft.metadata);
-            // setBlogs((prevState) => [
-            //   ...prevState,
-            //   { description: description, externalUrl: externalUrl },
-            // ]);
-
-            // let { data: blogContent } = await axios.get<BlogContentTypes>(
-            //   externalUrl.replace(
-            //     "https://ipfs.moralis.io:2053/ipfs/",
-            //     "https://gateway.moralisipfs.com/ipfs/"
-            //   )
-            // );
-            // setBlogsContent((prevState) => [
-            //   ...prevState,
-            //   { title: blogContent.title, content: blogContent.content },
-            // ]);
+            let item: BlogsTypes = {
+              description: description,
+              externalUrl: externalUrl,
+              owner: nft.owner_of,
+            };
+            if (!blogs.includes(item)) {
+              content.push(item);
+            }
           }
+
+          // let { data } = await axios.get<MetadataTypes>(nft.metadata);
+          // setBlogs((prevState) => [
+          //   ...prevState,
+          //   { description: description, externalUrl: externalUrl },
+          // ]);
+
+          // let { data: blogContent } = await axios.get<BlogContentTypes>(
+          //   externalUrl.replace(
+          //     "https://ipfs.moralis.io:2053/ipfs/",
+          //     "https://gateway.moralisipfs.com/ipfs/"
+          //   )
+          // );
+          // setBlogsContent((prevState) => [
+          //   ...prevState,
+          //   { title: blogContent.title, content: blogContent.content },
+          // ]);
         });
+        setBlogs(content);
       }
     })();
   }, [allNfts]);
