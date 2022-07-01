@@ -41,32 +41,34 @@ const PublishForm = () => {
           type: "base64",
           saveIPFS: true,
           onSuccess: async (result) => {
-            const metadataNFT = {
-              description: input.title,
-              //@ts-ignore
-              externalUrl: result._ipfs,
-            };
+            //@ts-ignore
+            await mint(account, result._ipfs);
+            // const metadataNFT = {
+            //   description: input.title,
+            //   //@ts-ignore
+            //   externalUrl: result._ipfs,
+            // };
 
-            await saveFile(
-              "metadata.json",
-              {
-                base64: btoa(JSON.stringify(metadataNFT)),
-              },
-              {
-                type: "base64",
-                saveIPFS: true,
-                onSuccess: async (finalResult) => {
-                  //@ts-ignore
-                  // console.log(finalResult._ipfs);
-                  //@ts-ignore
-                  await mint(account!, finalResult._ipfs);
-                },
-                onError: (error) => {
-                  console.log(error);
-                  setIsUploadingToIpfs(false);
-                },
-              }
-            );
+            // await saveFile(
+            //   "metadata.json",
+            //   {
+            //     base64: btoa(JSON.stringify(metadataNFT)),
+            //   },
+            //   {
+            //     type: "base64",
+            //     saveIPFS: true,
+            //     onSuccess: async (finalResult) => {
+            //       //@ts-ignore
+            //       // console.log(finalResult._ipfs);
+            //       //@ts-ignore
+            //       await mint(account!, finalResult._ipfs);
+            //     },
+            //     onError: (error) => {
+            //       console.log(error);
+            //       setIsUploadingToIpfs(false);
+            //     },
+            //   }
+            // );
           },
           onError: (error) => {
             console.log(error);
@@ -99,7 +101,7 @@ const PublishForm = () => {
         msgValue: Moralis.Units.ETH("0.01"),
       },
       onSuccess: async (result) => {
-        console.log(result);
+        // console.log(result);
 
         //@ts-ignore
         // await result.wait(1);
