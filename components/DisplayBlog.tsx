@@ -8,29 +8,22 @@ import axios from "axios";
 import BlogCard from "./BlogCard";
 import { Stack } from "@mui/material";
 
-interface BlogsContentMetadataTypes {
+interface BlogsMetadataTypes {
   title: string;
   content: string;
-}
-interface BlogsContentTypes extends BlogsContentMetadataTypes {
-  owner: string;
-  url: string;
-}
-interface BlogsMetadataTypes {
-  description: string;
-  externalUrl: string;
 }
 
 interface BlogsTypes extends BlogsMetadataTypes {
   owner: string;
+  cid: string;
 }
 
 const DisplayBlog = () => {
   const [blogs, setBlogs] = useState<BlogsTypes[]>([]);
-  const [blogsContent, setBlogsContent] = useState<BlogsContentTypes[]>([]);
+  // const [blogsContent, setBlogsContent] = useState<BlogsContentTypes[]>([]);
 
   const { token } = useMoralisWeb3Api();
-  const { data: allNfts, fetch: getNfts } = useMoralisWeb3ApiCall(
+  const { data: allNfts } = useMoralisWeb3ApiCall(
     token.getNFTOwners,
     {
       chain: "mumbai",
@@ -38,56 +31,27 @@ const DisplayBlog = () => {
     },
     { autoFetch: true }
   );
-  console.log(allNfts);
-  // console.log(blogs);
-  // console.log(blogsContent);
-
-  // useEffect(() => {
-  //   (() => {
-  //     if (blogs && blogsContent.length === 0) {
-  //       let content: BlogsContentTypes[] = [];
-  //       blogs.map(async (blog) => {
-  //         let { data } = await axios.get<BlogsContentMetadataTypes>(
-  //           blog.externalUrl.replace(
-  //             "https://ipfs.moralis.io:2053/ipfs/",
-  //             // "https://ipfs.io/ipfs/"
-  //             "https://gateway.moralisipfs.com/ipfs/"
-  //           )
-  //         );
-  //         //console.log(data);
-  //         let item: BlogsContentTypes = {
-  //           content: data.content,
-  //           title: data.title,
-  //           owner: blog.owner,
-  //           url: blog.externalUrl,
-  //         };
-  //         content.push(item);
-  //       });
-  //       setBlogsContent(content);
-  //       // console.log(blogsContent);
-  //     }
-  //   })();
-  // }, [blogs]);
+  // console.log(allNfts);
 
   useEffect(() => {
     (() => {
       if (allNfts?.result) {
-        let content: BlogsTypes[] = [];
+        let contents: BlogsTypes[] = [];
         allNfts.result.map(async (nft) => {
-          if (nft.metadata) {
-            let { description, externalUrl }: BlogsMetadataTypes = JSON.parse(
+          if (nft.metadata && nft.token_uri) {
+            let { title, content }: BlogsMetadataTypes = JSON.parse(
               nft.metadata
             );
             let item: BlogsTypes = {
-              description: description,
-              externalUrl: externalUrl,
+              title: title,
+              content: content,
               owner: nft.owner_of,
+              cid: nft.token_uri.split("/")[4],
             };
-
-            content.push(item);
+            contents.push(item);
           }
         });
-        setBlogs(content);
+        setBlogs(contents);
       }
     })();
   }, [allNfts]);
@@ -100,9 +64,9 @@ const DisplayBlog = () => {
             <BlogCard
               key={index}
               owner={blog.owner}
-              title={blog.externalUrl}
-              content={blog.description}
-              url={blog.externalUrl}
+              title={blog.title}
+              content={blog.content}
+              cid={blog.cid}
             />
           ))}
       </Stack>

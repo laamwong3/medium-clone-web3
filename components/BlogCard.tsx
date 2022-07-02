@@ -10,22 +10,22 @@ interface BlogContentTypes {
   title?: string;
   content?: string;
   owner?: string;
-  url?: string;
+  cid?: string;
 }
 
 export default function BlogCard({
   title,
   content,
   owner,
-  url,
+  cid,
 }: BlogContentTypes) {
   const router = useRouter();
   const displayBlog = () => {
-    const hash = url?.split("/")[4];
+    const hash = cid;
     router.push(`/blog/${hash}`);
   };
   return (
-    <Card sx={{ maxWidth: "100%", maxHeight: 2750 }}>
+    <Card sx={{ maxWidth: "100%", height: 150, overflow: "scroll" }}>
       <CardActionArea onClick={displayBlog}>
         <CardContent>
           <Typography gutterBottom variant="subtitle1" component="div">
@@ -34,7 +34,7 @@ export default function BlogCard({
           <Typography gutterBottom variant="h5" component="div">
             {title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" component="div">
             {content}
           </Typography>
         </CardContent>
