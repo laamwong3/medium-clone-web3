@@ -43,6 +43,7 @@ export default function Layout(props: Props) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   // const [isUploading, setIsUploading] = useState(false);
   const { isUploadingToIpfs, setIsUploadingToIpfs } = useStateAPI();
+  // const {logout} = useMoralis();
 
   const {
     logout,
@@ -50,6 +51,7 @@ export default function Layout(props: Props) {
     authenticate,
     isAuthenticating,
     isLoggingOut,
+    Moralis,
   } = useMoralis();
 
   const handleDrawerToggle = () => {
@@ -57,6 +59,10 @@ export default function Layout(props: Props) {
   };
 
   const router = useRouter();
+
+  React.useEffect(() => {
+    Moralis.onAccountChanged(async (account) => await logout());
+  }, []);
 
   const drawer = (
     <div>
@@ -249,4 +255,7 @@ export default function Layout(props: Props) {
       </Box>
     </Box>
   );
+}
+function account(account: any) {
+  throw new Error("Function not implemented.");
 }
